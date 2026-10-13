@@ -1,94 +1,58 @@
-# One MongoDB container, one logical database per service (database-per-service).
-# Only the API Gateway is published to the host.
 name: sports-center
 
 x-service: &service
   restart: unless-stopped
-  networks: [backend]
+  networks:
+    - backend
 
 services:
-  mongo:
-    image: mongo:7
-    restart: unless-stopped
-    volumes: [mongo_data:/data/db]
-    networks: [backend]
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-
   registration-service:
     <<: *service
     build: ./Registration_Microservice
-    env_file: ./Registration_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
+    env_file:
+      - ./Registration_Microservice/.env
 
   auth-service:
     <<: *service
     build: ./Authentication_Microservice
-    env_file: ./Authentication_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
-      registration-service: { condition: service_healthy }
+    env_file:
+      - ./Authentication_Microservice/.env
 
   facility-service:
     <<: *service
     build: ./Facility_Microservice
-    env_file: ./Facility_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
+    env_file:
+      - ./Facility_Microservice/.env
 
   maintenance-service:
     <<: *service
     build: ./Maintenance_Microservice
-    env_file: ./Maintenance_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
-      facility-service: { condition: service_healthy }
+    env_file:
+      - ./Maintenance_Microservice/.env
 
   reservation-service:
     <<: *service
     build: ./Reservation_Microservice
-    env_file: ./Reservation_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
-      facility-service: { condition: service_healthy }
-      maintenance-service: { condition: service_healthy }
+    env_file:
+      - ./Reservation_Microservice/.env
 
   matching-service:
     <<: *service
     build: ./Matching_Microservice
-    env_file: ./Matching_Microservice/.env
-    depends_on:
-      mongo: { condition: service_healthy }
-      reservation-service: { condition: service_healthy }
+    env_file:
+      - ./Matching_Microservice/.env
 
   api-gateway-1:
     <<: *service
     build: ./APIGateway_Microservice
-    env_file: ./APIGateway_Microservice/.env
-    depends_on:
-      registration-service: { condition: service_healthy }
-      auth-service: { condition: service_healthy }
-      facility-service: { condition: service_healthy }
-      reservation-service: { condition: service_healthy }
-      matching-service: { condition: service_healthy }
-      maintenance-service: { condition: service_healthy }
+    env_file:
+      - ./APIGateway_Microservice/.env
 
   api-gateway-2:
     <<: *service
     build: ./APIGateway_Microservice
-    env_file: ./APIGateway_Microservice/.env
-    depends_on:
-      registration-service: { condition: service_healthy }
-      auth-service: { condition: service_healthy }
-      facility-service: { condition: service_healthy }
-      reservation-service: { condition: service_healthy }
-      matching-service: { condition: service_healthy }
-      maintenance-service: { condition: service_healthy }
+    env_file:
+      - ./APIGateway_Microservice/.env
 
   load-balancer:
     image: nginx:alpine
@@ -97,13 +61,12 @@ services:
       - "3000:80"
     volumes:
       - ./load-balancer/nginx.conf:/etc/nginx/nginx.conf:ro
-    networks: [backend]
+    networks:
+      - backend
     depends_on:
-      api-gateway-1: { condition: service_healthy }
-      api-gateway-2: { condition: service_healthy }
+      - api-gateway-1
+      - api-gateway-2
 
 networks:
   backend:
-
-volumes:
-  mongo_data:
+    driver: bridge

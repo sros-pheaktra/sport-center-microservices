@@ -117,12 +117,22 @@ exports.availability = async (req, res) => {
 };
 
 // GET /:id   (owner, staff, or internal service)
+
 exports.get = async (req, res) => {
   const r = await Reservation.findById(req.params.id);
   if (!r) throw httpError(404, 'Reservation not found');
-  if (!isStaff(req.user) && r.userId !== req.user.id) throw httpError(403, 'Not your reservation');
+
+  // Trusted internal services may read reservations without a user ID.
+  if (req.user?.role !== 'system') {
+    if (!req.user?.id) throw httpError(401, 'Authentication required');
+    if (!isStaff(req.user) && String(r.userId) !== String(req.user.id)) {
+      throw httpError(403, 'Not your reservation');
+    }
+  }
+
   res.json(r);
 };
+
 
 // PATCH /:id/cancel   body: { reason? }
 exports.cancel = async (req, res) => {

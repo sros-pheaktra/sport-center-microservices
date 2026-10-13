@@ -8,9 +8,9 @@ Catalogue of courts and fields (basketball, football, badminton, tennis). Status
 |---|---|---|
 | GET | `/?type=&status=&q=&page=&limit=` | any signed-in user (customers don't see `inactive`) |
 | GET | `/:id` | any signed-in user |
-| POST | `/` | admin, manager |
-| PUT | `/:id` | admin, manager |
-| PATCH | `/:id/status` | admin, manager, Maintenance service. Body: `{ status, onlyIfCurrent? }` |
+| POST | `/` | admin |
+| PUT | `/:id` | admin |
+| PATCH | `/:id/status` | admin, Maintenance service. Body: `{ status, onlyIfCurrent? }` |
 | DELETE | `/:id` | admin |
 
 ## Configuration

@@ -7,17 +7,22 @@ const { requireRole, requireUser } = require('../middleware/gatewayTrust');
 router.get('/internal/conflicts', requireRole('system'), c.conflicts);
 router.post('/internal/cancel-conflicts', requireRole('system'), c.cancelConflicts);
 
-router.use(requireUser);
+router.get('/availability', requireUser, c.availability);
+router.get('/my', requireUser, c.mine);
 
-router.get('/availability', c.availability);
-router.get('/my', c.mine);
+router.get('/', requireUser, requireRole('admin'), c.list);
+router.post('/', requireUser, c.create);
 
-router.get('/', requireRole('admin'), c.list);
+router.get('/:id', (req, res, next) => {
+  if (req.headers['x-user-role'] === 'system') {
+    return c.get(req, res, next);
+  }
+  return requireUser(req, res, next);
+});
 
-router.post('/', c.create);
+router.patch('/:id/cancel', requireUser, c.cancel);
+router.patch('/:id/matching', requireUser, c.setMatching);
 
-router.get('/:id', c.get);
-router.patch('/:id/cancel', c.cancel);
-router.patch('/:id/matching', c.setMatching);
+
 
 module.exports = router;

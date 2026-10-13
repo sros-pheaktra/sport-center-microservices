@@ -10,10 +10,10 @@ Creating a ticket over existing reservations returns **409 + the conflicts**; re
 
 | Method | Path | Access |
 |---|---|---|
-| POST | `/` | admin, manager. Body: `facilityId, title, description?, priority?, startTime, endTime, force?` |
-| GET | `/?status=&facilityId=` | admin, manager |
-| GET / PUT | `/:id` | admin, manager |
-| PATCH | `/:id/status` | admin, manager. Body: `{ status }` |
+| POST | `/` | admin. Body: `facilityId, title, description?, priority?, startTime, endTime, force?` |
+| GET | `/?status=&facilityId=` | admin |
+| GET / PUT | `/:id` | admin |
+| PATCH | `/:id/status` | admin. Body: `{ status }` |
 | GET | `/facility/:facilityId/check?start=&end=` | Reservation service |
 
 ## Configuration
